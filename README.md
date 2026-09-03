@@ -64,35 +64,51 @@ Web Intent Detection
     │
     ├── Known Intent ──► Controlled Official SVU Web Retrieval
     │
-    └── No Known Intent ──► Local FAISS Retrieval
-    │
-    ▼
-Knowledge Sufficiency agent
-    │
-    ├── Sufficient ───────────────┐
-    │                             │
-    └── Insufficient ──► Web Fallback
-                                  │
-                                  ▼
-                    Response Generation Agent
-                                  │
-                                  ▼
-                           LLM Provider
-                    ┌──────────────┴──────────────┐
-                    │                             │
-             Local Primary                 Cloud Fallback
-          Qwen2.5-3B-Instruct            GPT-OSS 20B
-             via LM Studio                  via Groq
-                    │                             │
-                    └──────────────┬──────────────┘
-                                   │
-                                   ▼
-                              Final Output
-                                   │
-                         ┌─────────┴─────────┐
-                         │                   │
-                Final Answer + Sources   Abstention
-```
+    └── No Known Intent
+              │
+              ▼
+     Knowledge Retrieval Agent
+              │
+              ▼
+        Local FAISS Retrieval
+              │
+              ▼
+     Knowledge Sufficiency Agent
+              │
+        ┌─────┴─────┐
+        │           │
+   Sufficient   Insufficient
+        │           │
+        │           ▼
+        │      Web Fallback
+        │           │
+        │           ▼
+        └──────► Retrieved Evidence
+                       │
+                       ▼
+            Response Generation Agent
+                       │
+                       ▼
+                  LLMProvider
+                       │
+              ┌────────┴────────┐
+              │                 │
+        Primary Provider   Fallback Provider
+              │                 │
+              ▼                 ▼
+          LM Studio          Groq API
+              │                 │
+              ▼                 ▼
+      Qwen2.5-3B-Instruct   GPT-OSS 20B
+              │                 │
+              └────────┬────────┘
+                       │
+                       ▼
+                  Final Output
+                       │
+              ┌────────┴────────┐
+              │                 │
+     Final Answer + Sources   Abstention```
 
 ---
 
