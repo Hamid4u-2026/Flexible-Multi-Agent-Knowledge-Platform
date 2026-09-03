@@ -67,7 +67,7 @@ Web Intent Detection
     └── No Known Intent ──► Local FAISS Retrieval
     │
     ▼
-Knowledge Sufficiency Assessment
+Knowledge Sufficiency agent
     │
     ├── Sufficient ───────────────┐
     │                             │
