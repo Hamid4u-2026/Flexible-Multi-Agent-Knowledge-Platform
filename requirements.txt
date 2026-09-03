@@ -1,0 +1,13 @@
+﻿streamlit
+requests
+beautifulsoup4
+numpy
+faiss-cpu
+langchain-core
+langchain-community
+langchain-huggingface
+langchain-openai
+sentence-transformers
+crewai
+groq
+python-dotenv
