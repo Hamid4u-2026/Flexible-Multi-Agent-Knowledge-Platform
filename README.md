@@ -35,6 +35,16 @@ The current implementation focuses on demonstrating a reliable and explainable k
 
 ---
 
+---
+
+## Project Purpose
+
+This project demonstrates how a modular multi-agent architecture can combine knowledge retrieval, evidence evaluation, controlled access to external knowledge, and language-model generation to build a more reliable knowledge-oriented platform.
+
+The architecture is intentionally separated into independent components so that the knowledge sources, retrieval mechanisms, agents, and LLM providers can be extended or replaced without redesigning the entire application.
+
+---
+
 ## System Architecture
 
 The platform follows a multi-stage processing pipeline:
@@ -401,7 +411,7 @@ The `.gitignore` file should be used to prevent sensitive configuration files an
 Clone the repository:
 
 ```bash
-git clone <YOUR-GITHUB-REPOSITORY-URL>
+git clone https://github.com/Hamid4u-2026/Flexible-Multi-Agent-Knowledge-Platform.git
 cd Flexible-Multi-Agent-Knowledge-Platform
 ```
 
@@ -550,15 +560,7 @@ Groq API
 GPT-OSS 20B
 ```
 
----
 
-## Project Purpose
-
-This project demonstrates how a modular multi-agent architecture can combine knowledge retrieval, evidence evaluation, controlled access to external knowledge, and language-model generation to build a more reliable knowledge-oriented platform.
-
-The architecture is intentionally separated into independent components so that the knowledge sources, retrieval mechanisms, agents, and LLM providers can be extended or replaced without redesigning the entire application.
-
----
 
 ## Author
 
