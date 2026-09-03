@@ -341,7 +341,7 @@ Flexible-Multi-Agent-Knowledge-Platform/
 
 ## Main Components
 
-| ComponentResponsibility |                                                      |
+| Component |                           Responsibility                           |
 | ----------------------- | ---------------------------------------------------- |
 | `app.py`                | Streamlit user interface and application entry point |
 | `pipeline_core.py`      | Core pipeline coordination                           |
