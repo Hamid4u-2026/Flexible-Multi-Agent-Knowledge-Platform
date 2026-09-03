@@ -1,0 +1,25 @@
+# Virtual Environments
+.venv/
+venv/
+ENV/
+
+# Byte-compiled and Cached files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment Variables and Secrets
+.env
+.env.local
+
+# Local Vector Database & Processed Data
+data/processed/faiss_index/index.faiss
+data/processed/faiss_index/index_metadata.json
+
+# IDEs and Editors
+.vscode/
+.idea/
+
+# Logs and Debugging
+logs/
+*.log
