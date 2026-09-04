@@ -1,320 +1,61 @@
 
 ## Flexible Multi-Agent Knowledge Management Platform
 
-## Practical Use Case: Academic Guidance Portal for Syrian Virtual University (SVU)
+## Use Case **Academic Guidance Portal for the Syrian Virtual University (SVU)**.
 
-A modular **Retrieval-Augmented Generation (RAG)** platform that combines local institutional knowledge, controlled web retrieval, multi-agent processing, evidence-based generation, source attribution, and controlled abstention.
+A modular **Multi-Agent Knowledge Management Platform** designed to provide evidence-based academic guidance by combining local document retrieval, controlled official web retrieval, multilingual query processing, and flexible Large Language Model (LLM) providers.
 
-The platform is designed as a flexible knowledge management architecture that can be adapted to institutional domains where answers should be generated from trusted knowledge sources rather than from unrestricted model knowledge.
-
----
 
 ## Overview
 
-The **Flexible Multi-Agent Knowledge Management Platform** provides an academic guidance use case for the **Syrian Virtual University (SVU)**.
+The platform follows a modular architecture consisting of three specialized agents:
 
-The system processes user queries through a structured pipeline that combines:
+* **Knowledge Retrieval Agent** — retrieves relevant evidence from the local FAISS-based knowledge base and coordinates controlled web retrieval when required.
+* **Knowledge Sufficiency Agent** — evaluates whether the retrieved evidence is sufficient to support a response.
+* **Response Generation Agent** — generates the final evidence-grounded response using the available context or abstains when valid evidence is unavailable.
 
-1- Local document retrieval from a FAISS vector index.
+The system also provides a provider abstraction layer that supports a local LLM as the primary provider and a cloud LLM as a fallback provider.
 
-2- Knowledge Sufficiency Agent for evaluating whether the retrieved evidence is sufficient.
+## Project Objective
 
-3- Controlled retrieval from predefined official SVU web pages when required.
+The main objective is to develop a flexible knowledge management platform capable of:
 
-4- Arabic and English query routing.
+* Retrieving knowledge from institutional documents.
+* Supporting PDF and Word knowledge sources.
+* Applying Retrieval-Augmented Generation (RAG).
+* Supporting Arabic and English user queries.
+* Using controlled official web retrieval when local evidence is insufficient or when a supported web intent is detected.
+* Evaluating evidence sufficiency before response generation.
+* Preventing unsupported responses through abstention.
+* Providing source attribution for generated answers.
+* Supporting multiple LLM providers through a unified provider interface.
+* Maintaining a clear separation between the user interface, retrieval, evidence evaluation, generation, and LLM provider components.
 
-5- Evidence-based response generation.
-
-6- Source attribution.
-
-7- Evidence-constrained abstention when sufficient supporting information is unavailable.
-
-8- Local-to-cloud Large Language Model (LLM) provider fallback.
-
-The current implementation focuses on demonstrating a reliable and explainable knowledge retrieval workflow rather than unrestricted general-purpose question answering.
-
----
-
-## System Architecture
-
-The platform follows a multi-stage processing pipeline:
-
-```text
-User Query
-    │
-    ▼
-Language Router
-    │
-    ├── Arabic ──► English Retrieval Query
-    │
-    └── English
-    │
-    ▼
-Web Intent Detection
-    │
-    ├── Known Intent ──► Controlled Official SVU Web Retrieval
-    │
-    └── No Known Intent ──► Local FAISS Retrieval
-    │
-    ▼
-Knowledge Sufficiency Assessment
-    │
-    ├── Sufficient ───────────────┐
-    │                             │
-    └── Insufficient ──► Web Fallback
-                                  │
-                                  ▼
-                    Response Generation Agent
-                                  │
-                                  ▼
-                           LLM Provider
-                    ┌──────────────┴──────────────┐
-                    │                             │
-             Local Primary                 Cloud Fallback
-          Qwen2.5-3B-Instruct            GPT-OSS 20B
-             via LM Studio                  via Groq
-                    │                             │
-                    └──────────────┬──────────────┘
-                                   │
-                                   ▼
-                              Final Output
-                                   │
-                         ┌─────────┴─────────┐
-                         │                   │
-                Final Answer + Sources   Abstention
-```
-
----
-
-## Multi-Agent Architecture
-
-The system uses three specialized agents:
-
-### 1. Retrieval Agent
-
-Responsible for retrieving relevant knowledge from the local FAISS-based knowledge base and coordinating retrieval-related operations.
-
-### 2. Knowledge Sufficiency Agent
-
-Evaluates whether the retrieved evidence provides sufficient information to answer the user's request.
-
-When the available evidence is insufficient, the system can activate the controlled web fallback for supported intents.
-
-### 3. Response Generation Agent
-
-Generates the final response using the available evidence while applying source attribution and evidence-constrained response behavior, or explicitly abstains when sufficient evidence is unavailable.
-
-The system is designed to avoid unsupported answers by grounding responses in available evidence and explicitly abstaining when sufficient evidence is unavailable.
-
----
-
-## Retrieval-Augmented Generation
-
-The local knowledge base is implemented using **FAISS (Facebook AI Similarity Search)**.
-
-The ingestion pipeline processes institutional documents through:
-
-```text
-Source Documents
-      │
-      ▼
-Text Extraction
-      │
-      ▼
-Cleaning
-      │
-      ▼
-Chunking
-      │
-      ▼
-Embeddings
-      │
-      ▼
-FAISS Vector Index
-      │
-      ▼
-Similarity Retrieval
-      │
-      ▼
-Retrieved Evidence
-```
-
-The current knowledge base contains English-translated institutional documents used for the academic guidance use case.
-
-The embedding model currently used by the project is:
-
-```text
-BAAI/bge-small-en-v1.5
-```
-
-The vector index uses normalized embeddings with FAISS `IndexFlatL2`.
-
----
-
-## Multilingual Query Processing
-
-The system supports Arabic and English user queries.
-
-Because the current embedding model is English-oriented, Arabic queries are routed through a language processing layer that converts the retrieval query into English before semantic retrieval.
-
-The general flow is:
-
-```text
-Arabic Query
-     │
-     ▼
-Language Detection
-     │
-     ▼
-English Retrieval Query
-     │
-     ▼
-FAISS Retrieval
-     │
-     ▼
-Evidence-Based Generation
-     │
-     ▼
-Arabic / English Response
-```
-
-This approach allows the current English knowledge representation and embedding model to be used while maintaining Arabic query support.
-
----
-
-## Controlled Web Retrieval
-
-The platform does not perform unrestricted web search.
-
-Web retrieval is restricted to predefined official Syrian Virtual University pages associated with supported intents.
-
-The current controlled web sources include:
-
-```text
-University News
-https://www.svuonline.org/ar/node/506
-
-Student Affairs
-https://www.svuonline.org/ar/node/231
-
-Thesis Defenses
-https://www.svuonline.org/ar/node/3641
-```
-
-The web retrieval layer includes bilingual intent normalization to improve recognition of supported Arabic and English query forms.
-
-If a query does not match a supported web intent, the system continues through the local knowledge retrieval path.
-
----
-
-## Evidence Sufficiency and Abstention
-
-A central design principle of the platform is that the language model should operate within the boundaries of the available evidence.
-
-When sufficient evidence exists, the system generates an evidence-based response.
-
-When sufficient evidence is unavailable, the system can abstain from providing unsupported factual information.
-
-For example, a query containing both a supported academic requirement and an unrelated unsupported financial fact can produce a response that addresses the supported academic component while explicitly indicating that adequate evidence is unavailable for the unsupported component.
-
-This behavior is intended to reduce unsupported generation and improve response reliability.
-
----
-
-## Source Attribution
-
-The platform provides dynamic source attribution for retrieved evidence.
-
-Sources are associated with the actual retrieval process rather than being static interface metadata.
-
-Depending on the query, the final response may reference one or multiple knowledge sources, such as:
-
-```text
-academic_guide_en.pdf
-student_services_en.docx
-```
-
-This provides traceability between the generated response and the knowledge used to produce it.
-
----
-
-## LLM Provider Architecture
-
-The system supports a local primary model and a cloud fallback provider.
-
-### Local Primary
-
-```text
-LM Studio
-Qwen2.5-3B-Instruct
-```
-
-The local provider allows the system to operate without requiring a cloud LLM for normal execution.
-
-### Cloud Fallback
-
-```text
-Groq API
-GPT-OSS 20B
-```
-
-If the local provider is unavailable or fails during execution, the provider layer can switch to the configured Groq fallback.
-
-This design separates the application pipeline from the specific LLM provider and makes the generation layer more flexible.
-
----
-
-## Operational Interface
-
-The project includes a Streamlit-based interface for interacting with the platform.
-
-The interface presents:
-
-```text
-Final Answer
-
-Pipeline Status
-    Local Retrieval
-    Web Fallback
-    Generation Provider
-
-Source Attribution
-
-Recent Questions
-```
-
-The displayed pipeline information represents the execution state of the current query.
-
-This provides a lightweight **operational observability layer** that makes the system behavior easier to inspect during testing and demonstration.
-
----
 
 ## Project Structure
 
+The project is organized into separate modules according to their responsibilities:
+
 ```text
 Flexible-Multi-Agent-Knowledge-Platform/
-│
 ├── app.py
 ├── pipeline_core.py
 ├── ingest.py
 ├── requirements.txt
-├── .env
 ├── .gitignore
 ├── README.md
 │
 ├── data/
-│   ├── processed/
-│   │   └── faiss_index/
-│   │       ├── README.md
-│   │       ├── index.faiss
-│   │       └── index_metadata.json
+│   ├── raw/
+│   │   ├── pdf/
+│   │   │   └── academic_guide_en.pdf
+│   │   └── docx/
+│   │       └── student_services_en.docx
 │   │
-│   └── raw/
-│       ├── pdf/
-│       │   └── academic_guide_en.pdf
-│       │
-│       └── docx/
-│           └── student_services_en.docx
+│   └── processed/
+│       └── faiss_index/
+│           ├── index.faiss
+│           └── index_metadata.json
 │
 └── src/
     ├── __init__.py
@@ -337,240 +78,425 @@ Flexible-Multi-Agent-Knowledge-Platform/
         └── llm_provider.py
 ```
 
----
+`index.faiss` and `index_metadata.json` are generated processing artifacts and are excluded from Git through `.gitignore`.
 
-## Main Components
+## Key Features
 
-| ComponentResponsibility |                                                      |
-| ----------------------- | ---------------------------------------------------- |
-| `app.py`                | Streamlit user interface and application entry point |
-| `pipeline_core.py`      | Core pipeline coordination                           |
-| `ingest.py`             | Knowledge ingestion and FAISS index construction     |
-| `retrieval_agent.py`    | Knowledge retrieval operations                       |
-| `sufficiency_agent.py`  | Evidence sufficiency assessment                      |
-| `generation_agent.py`   | Evidence-based response generation                   |
-| `rag_tool.py`           | Local FAISS retrieval tool                           |
-| `web_retriever.py`      | Controlled official SVU web retrieval                |
-| `local_llm.py`          | Local LLM integration                                |
-| `groq_llm.py`           | Groq API integration                                 |
-| `llm_provider.py`       | LLM provider selection and fallback                  |
+### Multi-Agent Architecture
 
----
+The system contains three operational agents:
 
-## Knowledge Base
+#### 1. Knowledge Retrieval Agent
 
-The current demonstration knowledge base contains institutional SVU material represented in English for compatibility with the current embedding model.
+Responsible for:
 
-Current source documents include:
+* Retrieving relevant information from the local FAISS knowledge base.
+* Applying the configured similarity threshold.
+* Coordinating controlled official web retrieval.
+* Returning the evidence required by subsequent pipeline stages.
 
-```text
-academic_guide_en.pdf
-student_services_en.docx
-```
+#### 2. Knowledge Sufficiency Agent
 
-The generated FAISS knowledge index is stored under:
+Responsible for:
 
-```text
-data/processed/faiss_index/
-```
+* Evaluating whether retrieved evidence is sufficient.
+* Checking the availability of acceptable local or web evidence.
+* Preventing response generation when sufficient evidence is unavailable.
+* Supporting the system's abstention behavior.
 
-The repository includes the index metadata required by the retrieval layer.
+#### 3. Response Generation Agent
 
----
+Responsible for:
 
-## Configuration
+* Constructing the final context from retrieved evidence.
+* Generating an evidence-grounded answer.
+* Maintaining the user's original language.
+* Providing source attribution.
+* Applying an internal context guard before calling the LLM.
+* Abstaining when the generation context is empty or invalid.
 
-The project uses environment variables for provider configuration.
+## System Architecture
 
-Create a `.env` file in the project root and configure the required API credentials for the cloud fallback provider.
-
-Example:
-
-```env
-GROQ_API_KEY=your_api_key_here
-```
-
-Do not commit real API keys or other secrets to GitHub.
-
-The `.gitignore` file should be used to prevent sensitive configuration files and local environment artifacts from being committed.
-
----
-
-## Installation
-
-Clone the repository:
-
-```bash
-git clone <YOUR-GITHUB-REPOSITORY-URL>
-cd Flexible-Multi-Agent-Knowledge-Platform
-```
-
-Create and activate a Python virtual environment:
-
-```bash
-python -m venv flexible_multi_agent_env
-```
-
-Windows PowerShell:
-
-```powershell
-.\flexible_multi_agent_env\Scripts\Activate.ps1
-```
-
-Install the required dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## Running the Application
-
-Start the Streamlit application:
-
-```bash
-streamlit run app.py
-```
-
-After startup, open the local Streamlit address displayed in the terminal.
-
-The application then provides the academic guidance interface and the operational pipeline status for each query.
-
----
-
-## Knowledge Ingestion
-
-If the source documents are modified or new documents are introduced, the FAISS knowledge index can be regenerated using the ingestion script:
-
-```bash
-python ingest.py
-```
-
-The ingestion process creates the processed vector index and associated metadata used by the retrieval layer.
-
----
-
-## Evaluation
-
-The implemented system has been evaluated across several functional areas, including:
+The operational pipeline is:
 
 ```text
-Core Architecture
-Retrieval
-Translation
-LLM Provider
-Controlled Web Retrieval
-Source Attribution
-Abstention
-Grounded Generation
+User Query
+    │
+    ▼
+Language Router
+    │
+    ├── Arabic ──► English Retrieval Query
+    │
+    └── English
+    │
+    ▼
+Web Intent Detection
+    │
+    ├── Known Intent ──► Controlled Official SVU Web Retrieval
+    │
+    └── No Known Intent
+              │
+              ▼
+     Knowledge Retrieval Agent
+              │
+              ▼
+        Local FAISS Retrieval
+              │
+              ▼
+     Knowledge Sufficiency Agent
+              │
+        ┌─────┴─────┐
+        │           │
+   Sufficient   Insufficient
+        │           │
+        │           ▼
+        │      Web Fallback
+        │           │
+        │           ▼
+        └──────► Retrieved Evidence
+                       │
+                       ▼
+            Response Generation Agent
+                       │
+                       ▼
+                  LLMProvider
+                       │
+              ┌────────┴────────┐
+              │                 │
+        Primary Provider   Fallback Provider
+              │                 │
+              ▼                 ▼
+          LM Studio          Groq API
+              │                 │
+              ▼                 ▼
+      Qwen2.5-3B-Instruct   GPT-OSS 20B
+              │                 │
+              └────────┬────────┘
+                       │
+                       ▼
+                  Final Output
+                       │
+              ┌────────┴────────┐
+              │                 │
+     Final Answer + Sources   Abstention
 ```
 
-The evaluation also included mixed-sufficiency and composite-query scenarios to examine how the system handles requests containing both supported and unsupported information requirements.
+## Retrieval-Augmented Generation
 
-The results demonstrated that the system can retrieve evidence from multiple sources, identify insufficient evidence, use controlled web retrieval for supported intents, attribute retrieved sources, and constrain responses when evidence is unavailable.
+The local knowledge pipeline implements Retrieval-Augmented Generation (RAG) through the following stages:
 
----
+1. **Source Documents**
+   PDF and Word documents are used as the institutional knowledge sources.
 
-## Design Principles
+2. **Text Extraction**
+   Text is extracted from PDF and Word documents.
 
-The project follows several core engineering principles:
+3. **Text Cleaning**
+   Extracted content is normalized and cleaned.
 
-1- **Modularity**
-Core responsibilities are separated into agents, tools, retrieval components, and LLM provider modules.
+4. **Chunking**
+   Documents are divided into smaller overlapping text chunks.
 
-2- **Evidence-Based Generation**
-Responses are generated using retrieved evidence rather than relying solely on the language model's internal knowledge.
+5. **Embedding Generation**
+   Text chunks are converted into vector representations using `BAAI/bge-small-en-v1.5`.
 
-3- **Controlled Retrieval**
-Web retrieval is limited to predefined trusted SVU sources.
+6. **FAISS Indexing**
+   The embeddings are stored in a local FAISS `IndexFlatL2` vector index.
 
-4- **Provider Flexibility**
-The generation layer can operate with a local LLM and a configured cloud fallback.
+7. **Similarity Retrieval**
+   The system retrieves the most relevant chunks for the user's query.
 
-5- **Source Traceability**
-Retrieved knowledge sources are exposed as part of the final system output.
+8. **Evidence-Based Generation**
+   Retrieved evidence is passed to the generation stage and used as the context for the LLM.
 
-6- **Abstention**
-The system avoids presenting unsupported information as factual when adequate evidence is unavailable.
+The Retrieval Agent requests up to five local results and accepts local evidence according to the configured L2 similarity threshold, where lower L2 distance represents greater similarity.
 
-7- **Separation of Concerns**
-Retrieval, sufficiency assessment, generation, web access, and provider management are implemented as separate components.
+## Evidence Sufficiency & Abstention
 
----
+The platform uses evidence-based response control at two stages:
 
-## Current Scope and Limitations
+1. **Knowledge Sufficiency Agent**
+   Evaluates whether acceptable local or web evidence is available before response generation. If sufficient evidence is not available, the system returns an abstention response rather than generating an unsupported answer.
 
-The current implementation is a focused academic guidance use case rather than a production-scale institutional deployment.
+2. **Response Generation Agent**
+   Applies an internal context guard before calling the LLM. If the supplied context is empty or invalid, the agent abstains instead of generating a response.
 
-The local knowledge base currently contains a limited set of SVU documents.
+This layered approach helps keep generated responses grounded in retrieved evidence and reduces the risk of unsupported answers.
 
-The embedding model is English-oriented, so Arabic retrieval relies on the language routing and translation layer.
+## Multilingual Processing
 
-Controlled web retrieval is currently limited to predefined official SVU pages and supported intents.
+The system supports both **Arabic and English queries**.
 
-The system is designed to demonstrate the architecture and its reliability mechanisms within the defined project scope.
+For Arabic queries:
 
----
+1. The Language Router identifies the query as Arabic.
+2. The query is translated into English for local retrieval because the current institutional knowledge documents are in English.
+3. Retrieval is performed using the English retrieval query.
+4. The original Arabic query is preserved.
+5. The final response is generated in the user's original language.
 
-## Future Development
+English queries proceed directly to retrieval without the translation step.
 
-Potential future extensions include:
+## Controlled Web Retrieval
 
-1- Expansion of the institutional knowledge base.
+The system does not perform unrestricted web browsing.
 
-2- Support for additional trusted information sources.
+Instead, it uses a controlled web retrieval mechanism based on predefined official SVU sources and supported web intents.
 
-3- More advanced multilingual embedding models.
+Current supported intents include:
 
-4- Enhanced retrieval and ranking strategies.
+* Student affairs.
+* Thesis defenses.
+* University news.
 
-5- Persistent conversation and query history.
+The web retriever:
 
-6- Performance optimization and caching for larger-scale deployments.
+* Uses predefined official SVU pages.
+* Detects supported Arabic and English intent keywords.
+* Retrieves and cleans page content.
+* Removes unnecessary HTML elements such as scripts and styles.
+* Limits the amount of retrieved web content.
+* Uses web retrieval as a controlled fallback when acceptable local evidence is unavailable.
 
-These items are outside the current implementation and are presented as possible future extensions rather than existing system capabilities.
+This approach is intended to maintain a controlled and institution-focused external knowledge source.
 
----
+## LLM Provider Architecture
+
+The platform uses an `LLMProvider` abstraction to separate the application pipeline from individual LLM implementations.
+
+### Primary Provider
+
+**LM Studio — Qwen2.5-3B-Instruct**
+
+* Runs locally through the LM Studio OpenAI-compatible API.
+* Used as the primary generation provider.
+* Suitable for local development and offline-capable model execution when the local model server is available.
+
+### Fallback Provider
+
+**Groq API — GPT-OSS 20B**
+
+* Used when the primary local provider fails.
+* Requires a valid `GROQ_API_KEY`.
+* Provides a cloud-based fallback generation path.
+
+The provider architecture allows the rest of the application to use a unified interface without depending directly on a specific LLM implementation.
+
+## Web Interface
+
+The application provides a Streamlit-based web interface for the Academic Guidance Portal.
+
+The interface supports:
+
+* Arabic and English queries.
+* Final answer display.
+* Source attribution.
+* Pipeline status information.
+* Generation provider information.
+* Explicit abstention status.
+* Recent query history.
+* Restoring recent questions without rerunning the pipeline.
+
+The user interface is separated from the core pipeline logic, allowing the retrieval and generation components to operate independently from the presentation layer.
 
 ## Technology Stack
 
-```text
-Python
-Streamlit
-CrewAI
-FAISS
-Sentence Transformers
-BAAI/bge-small-en-v1.5
-PyPDF
-python-docx
-LM Studio
-Qwen2.5-3B-Instruct
-Groq API
-GPT-OSS 20B
+| Category                  | Technologies                   |
+| ------------------------- | ------------------------------ |
+| Programming Language      | Python                         |
+| User Interface            | Streamlit                      |
+| Architecture              | Multi-Agent Architecture       |
+| Retrieval                 | FAISS, LangChain               |
+| Embeddings                | BAAI/bge-small-en-v1.5         |
+| PDF Processing            | PyPDF                          |
+| Word Processing           | python-docx                    |
+| Web Retrieval             | Requests, BeautifulSoup        |
+| Local LLM                 | LM Studio, Qwen2.5-3B-Instruct |
+| Cloud LLM                 | Groq API, GPT-OSS 20B          |
+| Environment Configuration | python-dotenv                  |
+| Vector Search             | FAISS IndexFlatL2              |
+
+## Installation & Configuration
+
+### 1. Clone the Repository
+
+```bash
+git clone <https://github.com/Hamid4u-2026/Flexible-Multi-Agent-Knowledge-Platform>
+cd Flexible-Multi-Agent-Knowledge-Platform
 ```
 
----
+### 2. Create a Virtual Environment
 
-## Project Purpose
+On Windows PowerShell:
 
-This project demonstrates how a modular multi-agent architecture can combine knowledge retrieval, evidence evaluation, controlled access to external knowledge, and language-model generation to build a more reliable knowledge-oriented platform.
+```powershell
+python -m venv flexible_multi_agent_env
+.\flexible_multi_agent_env\Scripts\Activate.ps1
+```
 
-The architecture is intentionally separated into independent components so that the knowledge sources, retrieval mechanisms, agents, and LLM providers can be extended or replaced without redesigning the entire application.
+### 3. Install Dependencies
 
----
+```powershell
+pip install -r requirements.txt
+```
 
-## Author
+### 4. Configure Environment Variables
 
-Developed as an Artificial Intelligence Diploma graduation project.
+Create a `.env` file in the project root:
+
+```env
+GROQ_API_KEY=your_groq_api_key
+```
+
+Do not commit `.env` to the repository. It is excluded through `.gitignore`.
+
+### 5. Configure the Local LLM
+
+For the primary generation path:
+
+* Install and run LM Studio.
+* Load `Qwen2.5-3B-Instruct`.
+* Start the local OpenAI-compatible server.
+* Ensure the configured local endpoint is available to the application.
+
+The default local endpoint is:
+
+```text
+http://127.0.0.1:1234/v1/chat/completions
+```
+
+## Running the Application
+
+### Build or Rebuild the Local Knowledge Index
+
+Run:
+
+```powershell
+python ingest.py
+```
+
+The ingestion process extracts and processes the configured PDF and Word sources and creates the local FAISS index and metadata.
+
+### Start the Streamlit Application
+
+Run:
+
+```powershell
+streamlit run app.py
+```
+
+The application then provides the Academic Guidance Portal interface through Streamlit.
+
+## Knowledge Ingestion
+
+The current knowledge base contains:
+
+* `academic_guide_en.pdf`
+* `student_services_en.docx`
+
+The ingestion pipeline performs:
+
+* PDF text extraction.
+* Word document text extraction.
+* Text normalization.
+* Chunk creation.
+* Embedding generation.
+* FAISS vector index creation.
+* Metadata generation.
+
+The generated local artifacts are:
+
+```text
+data/processed/faiss_index/
+├── index.faiss
+└── index_metadata.json
+```
+
+These generated files are excluded from version control.
+
+## Retrieval Configuration
+
+The current retrieval implementation uses:
+
+* Embedding model: `BAAI/bge-small-en-v1.5`
+* Vector index: FAISS `IndexFlatL2`
+* Retrieval request: up to 5 chunks
+* Local similarity threshold: `0.65` L2 distance
+* Lower L2 distance: better similarity
+
+The retrieval stage returns evidence and metadata that are subsequently evaluated by the Knowledge Sufficiency Agent.
+
+## Scope & Limitations
+
+### Current Scope
+
+The current implementation focuses on:
+
+* Academic guidance.
+* Syrian Virtual University institutional information.
+* PDF and Word knowledge sources.
+* Controlled official SVU web retrieval.
+* Arabic and English queries.
+* Retrieval-Augmented Generation.
+* Evidence sufficiency evaluation.
+* Abstention behavior.
+* Local and cloud LLM providers.
+* Streamlit-based web interaction.
+
+### Current Limitations
+
+The current project does not include:
+
+* Unrestricted web search.
+* Image processing.
+* Advanced OCR.
+* LLM training or fine-tuning.
+* Embedding model training or fine-tuning.
+* Authentication and authorization.
+* Smartphone applications.
+* Microservices architecture.
+* A production-scale distributed vector database.
+* Per-subquestion semantic sufficiency evaluation.
+
+The current local FAISS index is generated during the knowledge ingestion process and is not committed to the Git repository.
+
+## Future Development
+
+Possible future extensions include:
+
+* Adding more institutional knowledge sources.
+* Expanding controlled official web coverage.
+* Improving multilingual retrieval.
+* Adding additional LLM providers.
+* Introducing retrieval reranking.
+* Expanding evaluation and benchmarking capabilities.
+* Supporting image and OCR-based knowledge sources.
+* Adding authentication and authorization.
+* Deploying the platform to a cloud environment.
+* Scaling the architecture for larger institutional knowledge bases.
+
+These items represent potential future development and are not part of the current implementation.
+
+## Academic Project
 
 **Project:** Flexible Multi-Agent Knowledge Management Platform
-**Use Case:** Academic Guidance Portal for Syrian Virtual University (SVU)
 
----
+**Application:** Academic Guidance Portal for the Syrian Virtual University
+
+**Project Type:** Graduation Project
+
+**Primary Focus:**
+
+* Multi-Agent Systems
+* Retrieval-Augmented Generation (RAG)
+* Evidence-Based Response Generation
+* Knowledge Sufficiency Evaluation
+* Controlled Web Retrieval
+* Multilingual Query Processing
+* LLM Provider Abstraction
 
 ## License
 
-This project is provided for educational and research purposes.
+This project is currently provided as an academic graduation project.
 
-If a specific open-source license is selected for the repository, this section should be updated accordingly.
+A formal open-source license may be added in a future release.
