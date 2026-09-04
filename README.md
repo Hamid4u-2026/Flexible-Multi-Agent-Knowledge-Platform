@@ -320,7 +320,7 @@ The user interface is separated from the core pipeline logic, allowing the retri
 ### 1. Clone the Repository
 
 ```bash
-git clone <https://github.com/Hamid4u-2026/Flexible-Multi-Agent-Knowledge-Platform>
+git clone https://github.com/Hamid4u-2026/Flexible-Multi-Agent-Knowledge-Platform
 cd Flexible-Multi-Agent-Knowledge-Platform
 ```
 
