@@ -317,7 +317,7 @@ The user interface is separated from the core pipeline logic, allowing the retri
 
 ## Installation & Configuration
 
-### 1. Clone the Repository
+## Clone the Repository
 
 ```bash
 git clone https://github.com/Hamid4u-2026/Flexible-Multi-Agent-Knowledge-Platform
